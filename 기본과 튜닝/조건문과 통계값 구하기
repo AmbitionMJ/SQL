@@ -1,1 +1,103 @@
+/* NULL 값 대신 다른 데이터 출력 (NVL, NVL2) */
+
+//이름과 월급과 커미션을 출력하는데 커미션이 null인 사원들은 값을 0으로 출력
+select ename,nvl(comm,0) comm from emp;
+
+//이름과 커미션을 출력하는데 커미션이 null인 사원들을 no comm 이라는 글씨로 출력
+select ename, nvl(to_char(comm),'no comm') from emp;
+
+
+/* IF문을 SQL로 구현 1(DECODE)  decode(컬럼명,조건1,변경값2,조건2,변견값2,...,나머지) */
+
+//이름, 부서번호, 보너스를 출력하는데 보너스는 부서번호가 10번이면 300, 부서번호가 20번이면 400, 나머지 부서번호는 0을 출력
+select ename, deptno, decode(deptno,10,300,20,400,0) as 보너스 from emp;
+
+//이름, 직업, 보너스를 출력하는데 직업이 SALESMAN이면 6000 , ANALYST면 3000, MANAGER면 2000, 나머지 직업은 0으로 출력 
+select ename, job, decode(job,'SALESMAN',6000,'ANALYST',3000,'MANAGER',2000,0) as 보너스 from emp;
+
+
+/* IF문을 SQL로 구현하기 (CASE) */
+
+//직업이 SALESMAN, ANALYST 인 사원들의 이름, 직업, 월급 보너스를 출력하는데 월급이 3000 이상이면 500, 월급이 2000 이상이면 300, 월급이 1000 이상이면 200, 나머지는 0을 출력 
+ select ename, job, sal, case when sal >=3000 then 500 when sal >= 2000 then 300when sal>=1000 then 200
+ else 0 end as 보너스 from emp where job in('SALESMAN','ANALYST');
+
+//이름,월급,보너스를 출력하는데 월급이 3000 이상이면 보너스 9000, 2000~3000이면 8000, 나머지(2000보다 작은)는 0을 출력
+select ename, sal, case when sal>=3000 then 9000 when sal>=2000 then 8000 else 0 end as 보너스 from emp;
+
+
+/* 최대값 출력 (MAX) */
+
+//사원 테이블에서 최대 월급을 출력
+select max(sal) from emp;
+
+//직업이 SALESMAN인 사원들중에서의 최대월급을 출력
+select max(sal) from emp where job='SALESMAN';
+
+//직업이 SALESMAN인 사원들 중에서의 최대월급을 출력하는데 직업도 같이 출력
+select job,max(sal) from emp where job='SALESMAN' group by job;
+
+
+/* 최소값 출력 (MIN) */
+
+//직업이 SALESMAN인 사원들 중에서 최소 월급을 출력
+select min(sal) from emp where job='SALESMAN';
+
+//부서번호가 20번인 사원들중에서 최소월급을 출력
+select min(sal) from emp where deptno=20;
+
+//부서번호와 부서번호별 최소월급을 출력
+select deptno, min(sal) from emp group by deptno;
+
+
+/* 평균값 출력 (AVG) */
+
+//사원 테이블에서 평균 월급을 출력
+select avg(sal) from emp;
+
+//직업과 직업별 평균월급을 출력하는데 직업별 평균월급이 높은것부터 출력
+select job,avg(sal) as 평균 from emp group by job order by 2 desc;
+
+//부서번호, 부서번호별 평균월급을 출력하는데 부서번호별 평균월급을 출력할때에 천단위 표시
+select deptno, to_char(avg(sal),'999,999') as 평균 from emp group by deptno;
+
+
+/* 토탈값 출력 (SUM) */
+
+//부서번호, 부서번호별 토탈 월급을 출력
+select deptno, sum(sal) from emp group by deptno;
+
+//1981년도에 입사한 사원들의 월급의 토탈값을 출력
+select sum(sal) from emp where hiredate between '81/1/1' and '81/12/31';
+select sum(sal) from emp where to_char(hiredate,'RRRR') ='1981';
+
+//직업과 직업별 토탈월급을 출력하는데 직업별 토탈월급이 6000 이상인 것만 출력
+(group by로 묶은 결과에 조건을 명시하는 경우에는 having 절을 이용해야 조건식이 적용됩니다.)
+select job, sum(sal) from emp group by job having sum(sal) >= 6000;
+
+
+/* 건수 출력 (COUNT) */
+
+//사원 테이블의 전체 인원수가 어떻게 되는지 출력
+select count(empno) from emp;
+
+//부서번호, 부서번호별 인원수를 출력
+(기본적으로 그룹함수는 null 값을 무시합니다. // * : null 포함)
+select deptno, count(*) from emp group by deptno;
+
+//직업과 직업별 인원수를 출력하는데 직업 SALESMAN은 제외하고 출력하고, 직업별 인원수가 3명 이상인것만 출력
+select job, count(*) from emp where job !='SALESMAN' group by job having count(*) >=3;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
