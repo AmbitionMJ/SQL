@@ -1,1 +1,82 @@
+/* 데이터 분석 함수로 순위 출력 1 (RANK) */
+(rank() over(order by 컬럼명 desc))
+
+//직업이 ANALYST, MANAGER 인 사원들의 이름, 직업, 월급과 월급에 대한 순위를 출력
+select ename, job, sal, rank() over(order by sal desc) as 순위 from emp where job in('ANALYST','MANAGER');
+
+//부서번호가 20번인 사원들의 이름과 부서번호와 월급과 월급에 대한 순위를 출력
+select ename, deptno, sal, rank() over(order by sal desc) as 순위 from emp where deptno=20;
+
+
+/* 데이터 분석 함수로 순위 출력 2 (DENSE_RANK) */
+
+//직업이 ANALYST, MANAGER 인 사원들의 이름, 직업, 월급과 월급에 대한 순위를 출력 (그 옆에 순위가 동일한 사람이 여러명인 경우 바로 다음 순위 출력)
+select ename, job, sal, dense_rank() over(order by sal desc) as 순위 from emp where job in('ANALYST','MANAGER');
+
+//직업, 이름, 월급, 순위를 출력하는데 순위가 직업별로 각각 월급이 높은 사원순으로 순위를 부여 
+(dense_rank() over(partition by 나눌 기준 컬럼 order by 순위를 적용할 컬럼)
+select job, ename, sal, dense_rank() over(partition by job order by sal desc) as 순위 from emp;
+
+//월급이 2975인 사원은 사원 테이블에서 월급 순위가 몇위인가?
+(dense_rank(기준 값) within group (order by 순위를 적용할 컬럼))
+select dense_rank(2975) within group (order by sal desc) as 순위 from emp;
+
+
+/* 데이터 분석 함수로 동급 출력 (NTILE) */
+
+//직업이 ANALYST, MANAGER, CLERK 인 사원들의 이름, 직업, 월급, 등급을 출력 (등급을 4등급으로 나눠서 출력)
+select ename, job, sal, ntile(4) over (order by sal desc) as 등급 from emp where job in ('ANALYST','MANAGER','CLERK');
+
+//이름, 입사일, 입사한 사원순으로 등급을 나누는데 등급을 5등급으로 나눠서 출력
+select ename, hiredate, ntile(5) over (order by hiredate desc) as 등급 from emp;
+
+
+/* 순위의 비율 출력 (CUME_DIST) */
+
+//이름, 월급, 순위, 자신의 월급의 순위에 대한 비율을 출력
+(cume_dist() over(order by 기준컬럼 desc))
+select ename, sal, dense_rank() over (order by sal desc) 순위, round(cume_dist() over(order by sal desc),2) 비율 from emp;
+
+//부서번호, 이름, 월급, 월급의 순위에 대한 비율을 출력 (순위 비율은 부서번호별로 각각 출력)
+select deptno, ename, sal, dense_rank() over(order by sal desc) 순위 , round(cume_dist() over(partition by deptno order by sal desc),2) 비율 from emp;
+
+
+/* 데이터를 가로로 출력 (LISTAGG) */
+
+//부서번호를 출력하고 해당 부서번호별로 속한 사원들의 이름을 가로로 출력
+(listagg(컬럼명, '붙일 구분자 또는 기호' within group (order by 기준 컬럼))
+select deptno, listagg(ename, ',') within group (order by ename asc) as 이름 from emp group by deptno;
+
+//직업, 직업별로 속한 사원들의 이름을 가로로 출력, 가로로 출력될 때에 월급이 높은사원부터 출력
+select job, listagg(ename,',') within group(order by sal desc) as 이름 from emp group by job;
+
+
+/* 바로 전 행과 다음 행 출력 (LAG,LEAD) */
+
+//직업이 ANALYST, MANAGER 인 사원들의 사원번호와 이름, 월급을 출력하는데 월급의 그 전행과 다음행을 출력 
+(lag(컬럼명, 행 번호) over (order by 기준컬럼))
+select ename, sal, lag(sal,1) over(order by sal asc) as 전, lead(sal,1) over(order by sal asc) as 다음 from emp where job in ('ANALYST','MANAGER');
+
+
+//이름, 입사일, 바로 전에 입사한 사원과의 간격일을 출력
+select ename, hiredate - lag(hiredate,1) over (order by hiredate asc) as 간격 from emp;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
